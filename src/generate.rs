@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use chrono::prelude::*;
 use crate::{
     expiry::{expiry_to_bytes, EXPIRY_SIZE},
     signature::compute_signature,
     HMACSHA256_BYTES,
 };
+use chrono::prelude::*;
 use rand::{thread_rng, Rng};
 use std::io::{self, Write};
 

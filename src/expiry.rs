@@ -29,18 +29,18 @@ pub(crate) const EXPIRY_SIZE: usize = 8;
 fn timestamp_to_date_time(timestamp_nanos: i64) -> DateTime<Utc> {
     let rem = timestamp_nanos % NANOS_IN_SEC;
     let naive = if timestamp_nanos >= 0 {
-        NaiveDateTime::from_timestamp(timestamp_nanos / NANOS_IN_SEC, rem as u32)
+        NaiveDateTime::from_timestamp_opt(timestamp_nanos / NANOS_IN_SEC, rem as u32)
     } else {
         if rem == 0 {
-            NaiveDateTime::from_timestamp(timestamp_nanos / NANOS_IN_SEC, 0)
+            NaiveDateTime::from_timestamp_opt(timestamp_nanos / NANOS_IN_SEC, 0)
         } else {
-            NaiveDateTime::from_timestamp(
+            NaiveDateTime::from_timestamp_opt(
                 timestamp_nanos / NANOS_IN_SEC - 1,
                 (NANOS_IN_SEC + rem) as u32,
             )
         }
     };
-    DateTime::<Utc>::from_utc(naive, Utc)
+    DateTime::<Utc>::from_naive_utc_and_offset(naive.unwrap(), Utc)
 }
 
 pub(crate) trait WriteExpiry: io::Write {
@@ -55,20 +55,24 @@ pub(crate) trait WriteExpiry: io::Write {
     ///
     /// Otherwise, when the underlying writer fails, this method returns the error.
     fn write_expiry(&mut self, expiry: DateTime<Utc>) -> io::Result<()> {
-        let min = DateTime::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc);
+        let min = DateTime::<Utc>::from_naive_utc_and_offset(
+            NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
+            Utc,
+        );
         // If the expiry exceeds this instant, the timestamp overflows.
-        let max = DateTime::from_utc(
-            NaiveDateTime::from_timestamp(
+        let max = DateTime::<Utc>::from_naive_utc_and_offset(
+            NaiveDateTime::from_timestamp_opt(
                 i64::max_value() / NANOS_IN_SEC,
                 (i64::max_value() % NANOS_IN_SEC) as u32,
-            ),
+            )
+            .unwrap(),
             Utc,
         );
         if expiry < min || max < expiry {
             return Err(io::ErrorKind::InvalidData.into());
         }
 
-        self.write_i64::<BigEndian>(expiry.timestamp_nanos())
+        self.write_i64::<BigEndian>(expiry.timestamp_nanos_opt().unwrap())
     }
 }
 
