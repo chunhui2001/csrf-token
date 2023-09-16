@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use chrono::prelude::*;
 use crate::{
     expiry::{bytes_to_expiry, EXPIRY_SIZE},
     signature::compute_signature,
     CsrfTokenError, CsrfTokenResult, HMACSHA256_BYTES,
 };
+use chrono::prelude::*;
 
 struct UnverifiedToken<'a> {
     nonce: &'a [u8],

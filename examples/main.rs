@@ -85,7 +85,8 @@ fn post(req: &HttpRequest<State>) -> impl Responder {
                 Ok(HttpResponse::Ok().body("Posted message: ".to_string() + &params.message))
             }
             Err(_) => Err(CsrfTokenError::TokenInvalid.into()),
-        }).responder()
+        })
+        .responder()
 }
 
 fn main() {
@@ -102,7 +103,8 @@ fn main() {
         App::with_state(generator.clone())
             .resource("/", |r| r.get().f(form))
             .resource("/post", |r| r.post().f(post))
-    }).bind("localhost:8080")
+    })
+    .bind("localhost:8080")
     .expect("port 8080 unavailable")
     .start();
 

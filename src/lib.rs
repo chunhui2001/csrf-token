@@ -45,8 +45,8 @@ mod generate;
 mod signature;
 mod verify;
 
-use chrono::{prelude::*, Duration};
 use crate::{generate::generate_token, verify::verify_token};
+use chrono::{prelude::*, Duration};
 use hmac::Hmac;
 use sha2::Sha256;
 
